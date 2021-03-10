@@ -236,7 +236,6 @@ namespace Sample {
         s3d::Array<s3d::int32>List;
         s3d::Array<s3d::int32>Answer;
         s3d::Array<s3d::int32>Enemy;
-        s3d::Font debug;
         s3d::Font Logfont;
         
         //自分の答えを送る(相手側で処理できるようにするため)
@@ -275,6 +274,7 @@ namespace Sample {
                     break;
             }
             case EventCode::Game::Request:{
+                //相手からのリクエスト
                 auto dic = ExitGames::Common::ValueObject<ExitGames::Common::Dictionary<nByte,int32>>(eventContent).getDataCopy();
                 s3d::Array<int32>Request;
                 for(auto i: s3d::step(4)){
@@ -282,13 +282,14 @@ namespace Sample {
                 }
                 AddHistory(Request);
                 
-                //ターンが変わる
+                //勝敗が決まっていなければターンが変わる
                 if(getData().getCurrentTurn()==Common::Turn::Self || getData().getCurrentTurn()==Common::Turn::Enemy){
                     getData().setCurrentTurn(Common::Turn::Self);
                 }
                 break;
             }
-            case EventCode::Game::Replay:{// 再戦
+            case EventCode::Game::Replay:{
+                // 再戦
                 getData().setCurrentTurn(Common::Turn::Enemy);
                 changeScene(Common::Scene::Game);
             }
@@ -299,8 +300,7 @@ namespace Sample {
         }
         
         void SelfUpdate(){
-            debug(s3d::ToString(Selecting)).draw(10,10);
-            
+            //自分のターン
             
             for(auto i : s3d::step(6)){
                 if(s3d::SimpleGUI::Button(s3d::ToString(i+1), s3d::Vec2(50,200+i*50),100) && Selecting<4){
@@ -313,17 +313,22 @@ namespace Sample {
                 --Selecting;
             }
             if(s3d::SimpleGUI::Button(U"send", s3d::Vec2(50,550),100,(Selecting==4))){
-                SendOpponent();
-                AddHistory(List);
+                SendOpponent(); //リクエスト送信
+                AddHistory(List); //結果の計算
+                //勝敗が決まっていなければターン交代
                 if(getData().getCurrentTurn()==Common::Turn::Self || getData().getCurrentTurn()==Common::Turn::Enemy){
                     getData().setCurrentTurn(Common::Turn::Enemy);
                 }
+                
+                // 初期化
                 List.fill(0);
                 Selecting=0;
             }
         }
         
         void AddHistory(s3d::Array<s3d::int32> List_){
+        //結果の計算
+        
             //自分のターン
             if(getData().getCurrentTurn() == Common::Turn::Self){
                 s3d::Array<s3d::int32>History=List_;
@@ -385,7 +390,6 @@ namespace Sample {
         Game(const InitData& init_) : IScene(init_),
         Selecting(0),
         List(4,0),
-        debug(50),
         Logfont(50),
         Answer(4,0),
         Enemy(4,0)
@@ -423,6 +427,7 @@ namespace Sample {
         }
         
         void draw()const override{
+            // 今考えている答え
             for(auto i : s3d::step(4)){
                 s3d::Rect(250,100+i*70,60).draw().drawFrame(3,0,(Selecting==i ? s3d::Palette::Orange : s3d::Palette::Silver));
                 if(List[i]){
@@ -443,6 +448,7 @@ namespace Sample {
                 Logfont(s3d::ToString(EnemyRequests[i][5])).draw(350+i*55,600,s3d::Palette::Blue);
                 Logfont(s3d::ToString(EnemyRequests[i][4])).draw(350+i*55,655,s3d::Palette::Gold);
             }
+            //仕切り
             s3d::Line(330,375,s3d::Scene::Width()-20,370).draw(s3d::Palette::Black);
             
             //勝敗の表示
