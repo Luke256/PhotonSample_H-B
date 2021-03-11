@@ -480,7 +480,7 @@ void Main() {
     s3d::FontAsset::Register(U"Menu", 30, s3d::Typeface::Regular);
 
     // シーンと遷移時の色を設定
-    MyScene manager(L"d4aa9956-43ca-4060-8758-52c497ed4209", L"1.0");
+    MyScene manager(L"/*ここを自分のappIDに変更してください*/", L"1.0");
 
     manager.add<Sample::Title>(Common::Scene::Title)
         .add<Sample::Match>(Common::Scene::Match)
