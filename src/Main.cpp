@@ -309,7 +309,9 @@ namespace Sample {
                 }
             }
             if(s3d::SimpleGUI::Button(U"back", s3d::Vec2(50,500),100,(Selecting!=0)) && Selecting>0){
-                List[Selecting]=0;
+                if (Selecting < 4) {
+                    List[Selecting]=0;
+                }
                 --Selecting;
             }
             if(s3d::SimpleGUI::Button(U"send", s3d::Vec2(50,550),100,(Selecting==4))){
